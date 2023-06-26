@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDoCRUDCRUD</title>
+</head>
+<body>
+    <form action="#" onsubmit="todo(event)">
+        ToDo Name: <input type="text" name="todoname" id="todoname" required> 
+        Description: <input type="text" name="description" id="description" required> 
+        <input type="submit" value="Add Item">
+    </form>
+    <h3>ToDos remaining</h3>
+    <ul id="listOfToDos"></ul>
+    <hr>
+    <h3>ToDos done</h3>
+    <ul id="listOfToDosDone"></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script>
+        // function todo(event){
+        //     event.preventDefault();
+        //     //using object
+        //     const todos={
+        //         name:event.target.todoname.value,
+        //         description:event.target.description.value
+        //     }
+            
+        //     axios.post('https://crudcrud.com/api/8781a72e278a432e9c8b0baacfc6e939/todoList',todos)
+        //          .then((response)=>{
+        //             showToDoOnScreen(response.data);
+        //             //console.log(response);
+        //          })
+        //          .catch((error)=>{
+        //             document.body.innerHTML = document.body.innerHTML + "<h4>Something went wrong</h4>"
+        //             console.log(error);
+        //          })
+            
+        // }
+        async function todo(event){
+            try{
+            event.preventDefault();
+            const todos={
+                name:event.target.todoname.value,
+                description:event.target.description.value,
+                done:false
+            }
+            const response = await axios.post('https://crudcrud.com/api/b39082b6b0aa4d1dbac1bf9ff75ee755/todoList',todos)
+            showToDoOnScreen(response.data);
+            } catch(error){
+                document.body.innerHTML = document.body.innerHTML + "<h4>Something went wrong</h4>"
+                console.log(error)
+            }
+        }
+            
+        // function showToDoOnScreen(todos){
+        //     const parentNode = document.getElementById('listOfToDos');
+        //     const childHTML = `<li id=${todos._id}> ${todos.name} - ${todos.description}
+        //         <input type="checkbox" onchange=displayOnToDoDone('${todos._id}')>
+        //         <button onclick=deleteToDo('${todos._id}')>X
+        //         </li>`
+
+        //         parentNode.innerHTML = parentNode.innerHTML + childHTML;
+        // }
+
+        function showToDoOnScreen(todos){
+            if(todos.done === false){
+                const parentNode = document.getElementById('listOfToDos');
+                const childHTML = `<li id=${todos._id}> ${todos.name} - ${todos.description}
+                <input type="checkbox" onchange=displayOnToDoDone('${todos._id}')>
+                <button onclick=deleteToDo('${todos._id}')>X
+                </li>`
+
+                parentNode.innerHTML = parentNode.innerHTML + childHTML; 
+            }               
+        }
+
+        // function deleteToDo(todoID){
+        //     axios.delete(`https://crudcrud.com/api/8781a72e278a432e9c8b0baacfc6e939/todoList/${todoID}`)
+        //          .then((response)=>{
+        //             removeToDoFromScreen(todoID);
+        //          })
+        //          .catch((err)=>{
+        //             console.log(err);
+        //          })
+        // }
+
+        async function deleteToDo(todoID){
+            try{
+                await axios.delete(`https://crudcrud.com/api/b39082b6b0aa4d1dbac1bf9ff75ee755/todoList/${todoID}`)
+                removeToDoFromScreen(todoID);
+            } catch(error){
+                document.body.innerHTML = document.body.innerHTML + "<h4>Something went wrong</h4>"
+                console.log(error);
+            }
+        }
+
+        function removeToDoFromScreen(todoID){
+            const parentNode = document.getElementById('listOfToDos');
+            const childNodeToBeDeleted = document.getElementById(todoID);
+            if(childNodeToBeDeleted){
+                parentNode.removeChild(childNodeToBeDeleted);
+            }
+        }
+
+        // function displayOnToDoDone(todoID){
+        //     axios.get(`https://crudcrud.com/api/8781a72e278a432e9c8b0baacfc6e939/todoList/${todoID}`)
+        //          .then((response)=>{
+        //             console.log(response);
+        //             removeToDoFromScreen(todoID);
+        //             showToDoOnDone(response.data)
+        //          })
+        //          .catch((err)=>{
+        //             console.log(err);
+        //          })
+        // }
+
+        async function displayOnToDoDone(todoID){
+            try{
+                const response1 = await axios.get(`https://crudcrud.com/api/b39082b6b0aa4d1dbac1bf9ff75ee755/todoList/${todoID}`)
+                removeToDoFromScreen(todoID);
+                    const response2 = await axios.put(`https://crudcrud.com/api/b39082b6b0aa4d1dbac1bf9ff75ee755/todoList/${todoID}`,{
+                    name:response1.data.name,
+                    description:response1.data.description,
+                    done:true
+                })
+                const response3 = await axios.get(`https://crudcrud.com/api/b39082b6b0aa4d1dbac1bf9ff75ee755/todoList/${todoID}`)
+                showToDoOnDone(response3.data);
+            } catch(error){
+                document.body.innerHTML = document.body.innerHTML + "<h4>Something went wrong</h4>"
+                console.log(error);
+            }
+        }
+
+        function showToDoOnDone(todos){
+            if(todos.done === true){
+                const parentNode = document.getElementById('listOfToDosDone');
+                const childHTML = `<li id=${todos._id}> ${todos.name} - ${todos.description}</li>`
+                parentNode.innerHTML = parentNode.innerHTML + childHTML;
+            }
+        }
+
+        
+
+        // window.addEventListener('DOMContentLoaded',()=>{
+        //     axios.get('https://crudcrud.com/api/b39082b6b0aa4d1dbac1bf9ff75ee755/todoList')
+        //          .then((response)=>{
+        //             console.log(response);
+        //             for(var i=0;i<response.data.length;i++){
+        //                 showToDoOnScreen(response.data[i]);
+        //                 showToDoOnDone(response.data[i]);
+        //             }
+        //          })
+        //          .catch((error)=>{
+        //             document.body.innerHTML = document.body.innerHTML + "<h4>Something went wrong</h4>"
+        //             console.log(error);
+        //          })
+        // })
+
+    window.addEventListener('DOMContentLoaded',async ()=>{
+        try{
+            const response = await axios.get('https://crudcrud.com/api/b39082b6b0aa4d1dbac1bf9ff75ee755/todoList')
+                for(var i=0;i<response.data.length;i++){
+                showToDoOnScreen(response.data[i]);
+                showToDoOnDone(response.data[i]);
+            }       
+        } catch(error){
+            document.body.innerHTML = document.body.innerHTML + "<h4>Something went wrong</h4>"
+            console.log(error);
+        } 
+    }); 
+
+    </script>
+</body>
+</html>
